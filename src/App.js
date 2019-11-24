@@ -8,7 +8,8 @@ import './App.css';
 
 function parseErrorPositionFromStack(stack) {
   const expression = /(?<=anonymous>:)(.*)(?=\))/g;
-  const positionString = stack.match(expression);
+  const positionString = stack.split('\n')
+      .filter(msg => msg.indexOf('eval') !== -1).shift().match(expression);
   if (!positionString) {
     return null;
   }
