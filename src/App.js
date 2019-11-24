@@ -8,7 +8,11 @@ import './App.css';
 
 function parseErrorPositionFromStack(stack) {
   const expression = /(?<=anonymous>:)(.*)(?=\))/g;
-  let [line, column] = stack.match(expression).pop().split(':');
+  const positionString = stack.match(expression);
+  if (!positionString) {
+    return null;
+  }
+  const [line, column] = positionString.pop().split(':');
   return {line, column};
 }
 
@@ -23,15 +27,17 @@ const run = (code) => {
   document.body.appendChild(frame);
   const win = frame.contentWindow;
   win.console.log = (msg) => win.document.write(msg);
-  let result = {output: null, isError: false};
+  let result = {output: null, errorMessage: null};
   try {
     win.eval(code);
     result.output = win.document.querySelector('body').innerText;
   } catch (error) {
+    let errorMessage = error.name + ': ' + error.message;
     const errorPosition = parseErrorPositionFromStack(error.stack);
-    const errorMessage = error.name + ': ' + error.message + ' (line: ' + errorPosition.line + ', column: ' + errorPosition.column + ')';
-    result.output = errorMessage;
-    result.isError = true;
+    if (errorPosition) {
+      errorMessage += ' (line: ' + errorPosition.line + ', column: ' + errorPosition.column + ')'
+    }
+    result.errorMessage = errorMessage;
   }
 
   return result;
@@ -63,7 +69,9 @@ function App() {
           }}
         />
         <button onClick={() => runCode(code)}>Run code</button>
-        <div id="output" className={result.isError ? 'error' : ''}>{result.output}</div>
+        <div id="output" className={result.errorMessage ? 'error' : ''}>
+          {result.errorMessage ? result.errorMessage : result.output}
+        </div>
       </div>
   );
 }
