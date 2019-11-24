@@ -6,6 +6,12 @@ import 'prismjs/components/prism-javascript';
 import 'prismjs/themes/prism.css';
 import './App.css';
 
+function parseErrorPositionFromStack(stack) {
+  const expression = /(?<=anonymous>:)(.*)(?=\))/g;
+  let [line, column] = stack.match(expression).pop().split(':');
+  return {line, column};
+}
+
 const run = (code) => {
   const oldFrame = document.querySelector('#sandbox');
   if (oldFrame) {
@@ -17,23 +23,31 @@ const run = (code) => {
   document.body.appendChild(frame);
   const win = frame.contentWindow;
   win.console.log = (msg) => win.document.write(msg);
-  win.eval(code);
-  const val = win.document.querySelector('body').innerText;
+  let result = {output: null, isError: false};
+  try {
+    win.eval(code);
+    result.output = win.document.querySelector('body').innerText;
+  } catch (error) {
+    const errorPosition = parseErrorPositionFromStack(error.stack);
+    const errorMessage = error.name + ': ' + error.message + ' (line: ' + errorPosition.line + ', column: ' + errorPosition.column + ')';
+    result.output = errorMessage;
+    result.isError = true;
+  }
 
-  return val;
+  return result;
 };
 
-const initialCode = `for (let i = 0; i<5; i++) {
+const initialCode = `for (let i = 0; i < 5; i++) {
     console.log('a');
 }`;
 
 function App() {
   const [code, setCode] = useState(initialCode);
-  const [output, setOutput] = useState('');
+  const [result, setResult] = useState({});
 
   const runCode = (code) => {
     const result = run(code);
-    setOutput(result);
+    setResult(result);
   };
 
   return (
@@ -49,7 +63,7 @@ function App() {
           }}
         />
         <button onClick={() => runCode(code)}>Run code</button>
-        <div id="output">{output}</div>
+        <div id="output" className={result.isError ? 'error' : ''}>{result.output}</div>
       </div>
   );
 }
