@@ -56,15 +56,14 @@ function App() {
   const [result, setResult] = useState({});
   const [cmdDown, setCmdDown] = useState(false);
 
-  const runCode = (code) => {
-    const result = run(code);
-    setResult(result);
+  const runCode = () => {
+    setResult(run(code));
   };
 
   return (
       <div className="app">
         <div>
-          <button onClick={() => runCode(code)} title={"CMD + R (while focus on editor)"}>Run code</button>
+          <button onClick={() => runCode()} title={"CMD + R (while focus on editor)"}>Run code</button>
         </div>
         <Editor
           value={code}
@@ -76,7 +75,7 @@ function App() {
             if (cmdDown) {
               if (event.keyCode === KEY_CODE_R) {
                 event.preventDefault();
-                runCode(code);
+                runCode();
               }
             } else if (event.keyCode === KEY_CODE_CMD) {
               setCmdDown(true);
