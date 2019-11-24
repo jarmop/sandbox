@@ -48,9 +48,13 @@ const initialCode = `for (let i = 0; i < 5; i++) {
     console.log('a');
 }`;
 
+const KEY_CODE_CMD = 91;
+const KEY_CODE_R = 82;
+
 function App() {
   const [code, setCode] = useState(initialCode);
   const [result, setResult] = useState({});
+  const [cmdDown, setCmdDown] = useState(false);
 
   const runCode = (code) => {
     const result = run(code);
@@ -60,7 +64,7 @@ function App() {
   return (
       <div className="app">
         <div>
-          <button onClick={() => runCode(code)}>Run code</button>
+          <button onClick={() => runCode(code)} title={"CMD + R (while focus on editor)"}>Run code</button>
         </div>
         <Editor
           value={code}
@@ -68,6 +72,21 @@ function App() {
           highlight={code => Prism.highlight(code, Prism.languages.js)}
           className="editor"
           padding={10}
+          onKeyDown={event => {
+            if (cmdDown) {
+              if (event.keyCode === KEY_CODE_R) {
+                event.preventDefault();
+                runCode(code);
+              }
+            } else if (event.keyCode === KEY_CODE_CMD) {
+              setCmdDown(true);
+            }
+          }}
+          onKeyUp={event => {
+            if (event.keyCode === KEY_CODE_CMD) {
+              setCmdDown(false);
+            }
+          }}
         />
         <div id="output" className={'output' + (result.errorMessage ? ' error' : '')}>
           {result.errorMessage ? result.errorMessage : result.output}
