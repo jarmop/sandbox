@@ -1,3 +1,15 @@
+.app {
+    display: grid;
+    grid-gap: 10px;
+}
+
+.editor {
+    font-family: "Fira code", "Fira Mono", monospace;
+    font-size: 12px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+}
+
 .error {
     color: red;
 }

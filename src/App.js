@@ -57,19 +57,18 @@ function App() {
   };
 
   return (
-      <div className="App">
+      <div className="app">
+        <div>
+          <button onClick={() => runCode(code)}>Run code</button>
+        </div>
         <Editor
           value={code}
           onValueChange={setCode}
           highlight={code => Prism.highlight(code, Prism.languages.js)}
+          className="editor"
           padding={10}
-          style={{
-            fontFamily: '"Fira code", "Fira Mono", monospace',
-            fontSize: 12,
-          }}
         />
-        <button onClick={() => runCode(code)}>Run code</button>
-        <div id="output" className={result.errorMessage ? 'error' : ''}>
+        <div id="output" className={'output' + (result.errorMessage ? ' error' : '')}>
           {result.errorMessage ? result.errorMessage : result.output}
         </div>
       </div>
